@@ -78,7 +78,7 @@ function getDropShipProductNames() {
         order_object.line_items.forEach(item => {
             if (Array.isArray(item.vendors) && 
                 item.vendors.some(vendor => dropShipVendors.includes(vendor.name))) {
-                    productNames.push(item.product.name);
+                    productNames.push(item.name);
             }
         });
         console.info('Drop-ship product names:', productNames);

@@ -10,6 +10,8 @@
       var lineItemObj = {
         ...{{ line_item | json }},
         choices: []
+        "vendors": {{ line_item.vendors | json }},
+        "name": {{ line_item.name | json }},
       };
 
       // If the line item has choices, loop through and add them
