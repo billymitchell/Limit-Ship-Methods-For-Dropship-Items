@@ -30,6 +30,24 @@ function checkForDropShipItems() {
     }
 }
 
+// Log vendor names for all items.
+function logItemVendors() {
+    try {
+        if (!order_object || !order_object.line_items) {
+            console.warn('Order object or its line_items not defined.');
+            return;
+        }
+        order_object.line_items.forEach(item => {
+            const vendorNames = Array.isArray(item.vendors)
+                ? item.vendors.map(vendor => vendor.name)
+                : [];
+            console.info('Item vendor names:', vendorNames);
+        });
+    } catch (error) {
+        console.error('Error logging item vendors:', error);
+    }
+}
+
 // Get vendor names from drop-ship items.
 function getDropShipVendors() {
     try {
@@ -113,10 +131,10 @@ async function hideShippingOptionsForDropShipItems() {
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.info('DOM loaded. Checking shipping options...');
+        logItemVendors();
         hideShippingOptionsForDropShipItems();
     } catch (error) {
         console.error('Error on DOMContentLoaded:', error);
     }
 });
-
 

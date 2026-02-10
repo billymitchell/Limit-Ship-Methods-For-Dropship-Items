@@ -1,0 +1,32 @@
+  <script>
+    // Initialize the order object with order details and an empty line_items array
+    var order_object = {
+      ...{{ order | json }},
+      line_items: []
+    };
+    
+    // Loop through line items and construct the lineItemObj
+    {% for line_item in order.line_items %}
+      var lineItemObj = {
+        ...{{ line_item | json }},
+        choices: []
+      };
+
+      // If the line item has choices, loop through and add them
+      {% if line_item.choices %}
+        {% for choice in line_item.choices %}
+          lineItemObj.choices.push({
+            ...{{ choice | json }},
+            choice_option: {{ choice.option | json }},
+            choice_sub_option: {{ choice.sub_option | json }}
+          });
+        {% endfor %}
+      {% endif %}
+      
+      // Push line item with choices into the order_object's line_items array
+      order_object.line_items.push(lineItemObj);
+    {% endfor %}
+    
+    // Log the final order object with line items and choices
+    console.log(order_object);
+  </script>
