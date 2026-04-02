@@ -10,6 +10,32 @@ const dropShipVendors = [
     'Power Sales',
     'Winning Edge'
 ];
+const expeditedShippingBypassGroup = 'Expedited Shipping Bypass';
+
+// Read user groups from the page URL.
+function getUserGroupsFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const userGroupsParam = params.get('user-groups');
+
+        if (!userGroupsParam) {
+            console.warn('No user-groups URL param found.');
+            return null;
+        }
+
+        const userGroups = userGroupsParam
+            .split(',')
+            .map(group => group.trim())
+            .filter(Boolean);
+
+        console.info('Raw user-groups URL param:', userGroupsParam);
+        console.info('Parsed user groups from URL:', userGroups);
+        return userGroups;
+    } catch (error) {
+        console.error('Error reading user-groups URL param:', error);
+        return null;
+    }
+}
 
 // Check if order_object contains drop-ship items.
 function checkForDropShipItems() {
@@ -90,7 +116,12 @@ function getDropShipProductNames() {
 }
 
 // Hide non-UPS Ground shipping options when drop-ship items are present.
-async function hideShippingOptionsForDropShipItems() {
+async function hideShippingOptionsForDropShipItems(userGroups = []) {
+    if (userGroups.includes(expeditedShippingBypassGroup)) {
+        console.info(`User is in "${expeditedShippingBypassGroup}". Skipping drop-ship shipping restrictions.`);
+        return;
+    }
+
     if (!checkForDropShipItems()) {
         console.info('No drop-ship items. Shipping options unchanged.');
         return;
@@ -131,10 +162,10 @@ async function hideShippingOptionsForDropShipItems() {
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.info('DOM loaded. Checking shipping options...');
+        const userGroups = getUserGroupsFromUrl() || [];
         logItemVendors();
-        hideShippingOptionsForDropShipItems();
+        hideShippingOptionsForDropShipItems(userGroups);
     } catch (error) {
         console.error('Error on DOMContentLoaded:', error);
     }
 });
-
