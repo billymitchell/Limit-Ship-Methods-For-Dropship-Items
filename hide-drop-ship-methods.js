@@ -11,17 +11,50 @@ const dropShipVendors = [
     'Winning Edge'
 ];
 const expeditedShippingBypassGroup = 'Expedited Shipping Bypass';
+const currentScriptSrc = document.currentScript ? document.currentScript.src : '';
 
-// Read user groups from the page URL.
+// Read user groups from the script URL first, then fall back to the page URL.
 function getUserGroupsFromUrl() {
     try {
-        const params = new URLSearchParams(window.location.search);
-        const userGroupsParam = params.get('user-groups');
+        let userGroupsParam = null;
+
+        if (currentScriptSrc) {
+            const scriptUrl = new URL(currentScriptSrc);
+            userGroupsParam = scriptUrl.searchParams.get('user-groups');
+            if (userGroupsParam) {
+                console.info('Reading user groups from script URL:', scriptUrl.href);
+            }
+        }
+
+        if (!userGroupsParam) {
+            const pageUrl = new URL(window.location.href);
+            userGroupsParam = pageUrl.searchParams.get('user-groups');
+            if (userGroupsParam) {
+                console.info('Reading user groups from page URL:', pageUrl.href);
+            }
+        }
+
+        // Handle malformed URLs where user-groups was appended with a second "?"
+        // after an existing query string, e.g. "?v=123?user-groups=Public,..."
+        if (!userGroupsParam) {
+            const fullUrl = window.location.href;
+            const userGroupsMatch = fullUrl.match(/[?&]user-groups=([^&#]+)/);
+            if (userGroupsMatch) {
+                userGroupsParam = decodeURIComponent(userGroupsMatch[1]);
+            } else {
+                const malformedMatch = fullUrl.match(/\?user-groups=([^&#]+)/);
+                if (malformedMatch) {
+                    userGroupsParam = decodeURIComponent(malformedMatch[1]);
+                }
+            }
+        }
 
         if (!userGroupsParam) {
             console.warn('No user-groups URL param found.');
             return null;
         }
+
+        userGroupsParam = userGroupsParam.replace(/^['"]|['"]$/g, '');
 
         const userGroups = userGroupsParam
             .split(',')

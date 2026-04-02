@@ -1,0 +1,9 @@
+{% if current_user %}
+{% assign groupNames = "" %}
+{% for group in current_user.groups %}
+{% assign groupNames = groupNames | append: group.title %}
+{% unless forloop.last %}
+{% assign groupNames = groupNames | append: ", " %}
+{% endunless %}
+{% endfor %}
+{% endif %}
